@@ -173,8 +173,7 @@ int main(int argc, char** argv) {
         std::cout << "GPU=" << prop.name << " N=" << n
                   << " iterations=" << iterations
                   << " chunks=" << chunks << "\n";
-        std::cout << "asyncEngineCount=" << prop.asyncEngineCount
-                  << " deviceOverlap=" << prop.deviceOverlap << "\n";
+        std::cout << "asyncEngineCount=" << prop.asyncEngineCount << "\n";
         std::cout << "metric,value\n";
         std::cout << "single_stream_mean_ms," << single.mean_ms << "\n";
         std::cout << "single_stream_min_ms," << single.min_ms << "\n";
