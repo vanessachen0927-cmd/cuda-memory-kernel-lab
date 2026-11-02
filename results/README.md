@@ -1,0 +1,1 @@
+Only publish actual observed GPU measurements here. Record GPU model, CUDA version, software versions, input size, run count, raw observations, and environment. Do not use synthetic numbers as benchmarks.
