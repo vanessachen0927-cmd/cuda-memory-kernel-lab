@@ -43,7 +43,7 @@ If the GPU runtime lacks `nvcc`, use a compatible environment or install an avai
 
 ## Caveats
 
-**This initial milestone does not yet implement streams, overlap, shared-memory kernels, GEMM or NCCL.** It is the reproducible baseline for those later experiments. Pinned allocation and pinned copies have costs; this first benchmark measures the copy operations after allocation, not full end-to-end application cost. Free Colab/Kaggle GPUs may vary between sessions and have time/resource limits. All reported results must come from an actual NVIDIA CUDA device.
+**The asynchronous multi-stream pipeline is now implemented but has not yet been measured on a GPU. Shared-memory kernels, GEMM and NCCL remain outside the current implementation.** It is the reproducible baseline for those later experiments. Pinned allocation and pinned copies have costs; this first benchmark measures the copy operations after allocation, not full end-to-end application cost. Free Colab/Kaggle GPUs may vary between sessions and have time/resource limits. All reported results must come from an actual NVIDIA CUDA device.
 
 ## Roadmap
 
@@ -51,3 +51,16 @@ If the GPU runtime lacks `nvcc`, use a compatible environment or install an avai
 2. Repeat measurements with standard deviation, transfer-size sweeps, allocation-inclusive end-to-end benchmark.
 3. Async `cudaMemcpyAsync`, multiple CUDA streams, compute/copy overlap and timeline plots.
 4. GEMM tiled shared-memory kernels, Nsight profiling (only when platform permissions permit), and rigorous comparisons.
+
+## Async CUDA stream pipeline (experimental)
+
+The new `src/stream_pipeline.cu` performs chunked pinned-memory H2D copies, vector-add kernels and D2H copies, comparing one nonblocking stream against four. Both cases use the same input, same number of chunks and the same preallocated memory. All results are checked against the CPU reference. This is a deliberately simple pipeline, **not a guaranteed speedup or proof that operations overlap**.
+
+On a CUDA-capable NVIDIA GPU:
+
+```bash
+nvcc -std=c++17 -O2 -I src src/stream_pipeline.cu -o stream_pipeline
+./stream_pipeline 8388608 20 16
+```
+
+Outputs include GPU property `asyncEngineCount`, host wall-clock per-iteration mean/min/max time, and single-stream divided by four-stream speedup. **No GPU timings for this new experiment are published yet.** Wall times include host enqueue and device synchronization, exclude initial memory allocation, and may vary under shared notebook GPU workloads. Record repeated independent runs, driver/toolkit versions and input shapes before drawing conclusions. See [baseline Tesla T4 sweep](results/tesla_t4_size_sweep_2026-11-02.md).
